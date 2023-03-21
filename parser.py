@@ -18,7 +18,7 @@ class Parser:
 
     def parse_atom(self) -> LispAtom:
         assert len(self.s_exp) > 0 and not self.s_exp[0].isspace()
-        literal = re.split(self.atom_re, self.s_exp)[0]
+        literal = re.split(Parser.atom_re, self.s_exp)[0]
         self.s_exp = self.s_exp[len(literal):]
         return LispAtom(literal)
 
@@ -27,7 +27,7 @@ class Parser:
         if self.s_exp[0] == '-':
             if len(self.s_exp) <= 1 or not self.s_exp[1].isdigit():
                 return self.parse_atom()
-        literal_num = self.s_exp.split()[0]
+        literal_num = re.split(Parser.atom_re, self.s_exp)[0]
         if re.fullmatch(Parser.number_re, literal_num) is None:
             raise NumberFormatException(literal_num)
         num = int(literal_num)
@@ -53,7 +53,7 @@ class Parser:
     def parse_string(self) -> LispString:
         assert len(self.s_exp) > 0 and self.s_exp[0] == '"'
         self.s_exp = self.s_exp[1:]
-        end_quote = re.search(self.string_re, self.s_exp)
+        end_quote = re.search(Parser.string_re, self.s_exp)
         unescaped_string = self.s_exp[:end_quote.start()]
         escaped_string = ast.literal_eval('\"' + unescaped_string + '\"')
         self.s_exp = self.s_exp[end_quote.end():]

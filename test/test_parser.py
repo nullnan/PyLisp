@@ -70,6 +70,9 @@ class TestParseAtom(unittest.TestCase):
         root = p.parse()
         self.assertEqual(LispNumber('0', -0), root)
 
+        root = Parser('(1234)').parse()
+        self.assertEqual(LispList([LispNumber('1234', 1234)]), root)
+
     def test_atom_string(self):
         p = Parser('"abcdef"')
         root = p.parse()

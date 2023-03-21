@@ -5,7 +5,7 @@ from dataclasses import dataclass
 @dataclass
 class LispElement:
     @abstractmethod
-    def is_atom(self):
+    def is_atom(self) -> bool:
         pass
 
     def __eq__(self, other):
@@ -19,6 +19,9 @@ class LispList(list, LispElement):
     def __str__(self):
         return f'({" ".join(map(str, self))})'
 
+    def __repr__(self):
+        return self.__str__()
+
     def __eq__(self, other):
         return LispElement.__eq__(self, other) and list.__eq__(self, other)
 
@@ -29,6 +32,9 @@ class LispAtom(LispElement):
 
     def is_atom(self) -> bool:
         return True
+
+    def __repr__(self):
+        return self.literal
 
     def __str__(self):
         return self.literal

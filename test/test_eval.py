@@ -90,5 +90,27 @@ class TestEval(unittest.TestCase):
         assertLispOutput(self, '(b c)', '(cdr (cons \'a \'(b c)))')
 
     def test_eval_cond_operator(self):
-
         assertLispOutput(self, 'second', '(cond ((eq \'a \'b) \'first) ((atom \'a)  \'second))')
+
+    def test_eval_lambda(self):
+        assertLispOutput(self, 't', '((lambda () \'t))')
+
+        assertLispOutput(self, 'a', '((lambda (x) (car x)) \'(a b c))')
+
+        assertLispOutput(self, '(a b c)', '((lambda (f) (f \'(b c))) \'(lambda (x) (cons \'a x)))')
+
+    def test_eval_defun(self):
+        env = {}
+        assertLispOutput(self, '', """
+(defun subst (x y z)
+  (cond ((atom z)
+         (cond ((eq z y) x)
+               ('t z)))
+        ('t (cons (subst x y (car z))
+                  (subst x y (cdr z))))))
+        """, env)
+        assertLispOutput(self, 'm', '(subst \'m \'b \'b)', env)
+
+        assertLispOutput(self, '(m)', '(subst \'m \'b \'(b)', env)
+
+        assertLispOutput(self, '(a m (a m c) d)', '(subst \'m \'b \'(a b (a b c) d))', env)

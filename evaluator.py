@@ -1,93 +1,6 @@
+from ast_lambda import LispLambda
 from ast_node import *
-
-nil = LispList()
-t = LispAtom('t')
-
-
-def quote(operands: list, env: dict):
-    if len(operands) != 1:
-        raise Exception('quote only have one operand.')
-    return operands[0]
-
-
-def atom(operands: list, env: dict):
-    if len(operands) != 1:
-        raise Exception('atom only have one operand.')
-    return t if Evaluator.eval(operands[0], env).is_atom() else nil
-
-
-def eq(operands: list, env: dict):
-    if len(operands) != 2:
-        raise Exception('eq only have two operands.')
-    x = Evaluator.eval(operands[0], env)
-    y = Evaluator.eval(operands[1], env)
-
-    if not x.is_atom() or not y.is_atom():
-        return nil
-
-    if isinstance(x, LispList) and isinstance(y, LispList):
-        return t
-    if isinstance(x, LispString) and isinstance(y, LispString):
-        return t if x == y else nil
-    if isinstance(x, LispNumber) and isinstance(y, LispNumber):
-        return t if x.number == y.number else nil
-    if isinstance(x, LispAtom) and isinstance(y, LispAtom):
-        return t if x.literal == y.literal else nil
-    return nil
-
-
-def car(operands: list, env: dict):
-    if len(operands) != 1:
-        raise Exception('car only have one operand')
-    x = Evaluator.eval(operands[0], env)
-    if x.is_atom():
-        if isinstance(x, LispList):
-            return nil
-        raise Exception('car require operand is a list')
-    return x[0]
-
-
-def cdr(operands: list, env: dict):
-    if len(operands) != 1:
-        raise Exception('cdr only have one operand')
-    x = Evaluator.eval(operands[0], env)
-    if x.is_atom():
-        if isinstance(x, LispList):
-            return nil
-        raise Exception('cdr require operand is a list')
-    return LispList(x[1:])
-
-
-def cons(operands: list, env: dict):
-    if len(operands) != 2:
-        raise Exception('cons only have two operand')
-    x = Evaluator.eval(operands[0], env)
-    y = Evaluator.eval(operands[1], env)
-    if not isinstance(y, LispList):
-        raise Exception('value of y must be a list')
-    new_list = LispList([x])
-    new_list.extend(y)
-    return new_list
-
-
-def cond(operands: list, env: dict):
-    for cond_tuple in operands:
-        if not isinstance(cond_tuple, LispList) and len(cond_tuple) != 2:
-            raise Exception('each element of cond must a tuple in form like (p e)')
-        if Evaluator.eval(cond_tuple[0], env) == t:
-            return Evaluator.eval(cond_tuple[1], env)
-    return nil
-
-
-base_operator = {
-    'quote': quote,
-    'atom': atom,
-    'eq': eq,
-    'car': car,
-    'cdr': cdr,
-    'cons': cons,
-    'cond': cond
-}
+from base_operator import base_operators
 
 
 class Evaluator:
@@ -96,16 +9,29 @@ class Evaluator:
         if root.is_atom():
             if isinstance(root, (LispNumber, LispString, LispList)):
                 return root
-            return env[root.literal]
+            assert isinstance(root, LispAtom)
+            value = env[root.literal]
+            if not value.is_atom() and isinstance(value, LispList) and isinstance(value[0], LispAtom) \
+                    and value[0].literal == 'lambda':
+                return Evaluator.eval(value, env)
+            else:
+                return value
         elif isinstance(root, LispList):
             head = root[0]
             tail = root[1:]
-            if isinstance(head, LispAtom) and head.literal in base_operator:
-                return base_operator[head.literal](tail, env)
+            if isinstance(head, LispAtom) and head.literal in base_operators:
+                return base_operators[head.literal](tail, env)
 
-            args = map(Evaluator.eval, tail)
-            # func = Evaluator.eval(head, env)
-            # if not isinstance(func, LispAtom):
-            #     raise Exception('Error Header is not atom literal')
-            #
-            # # TODO: finish func(args)
+            args = list(map(lambda e: Evaluator.eval(e, env), tail))
+            func = Evaluator.eval(head, env)
+            if isinstance(func, LispAtom):
+                if isinstance(func, (LispNumber, LispNumber)):
+                    raise Exception(f'{str(func)} is not a procedure')
+                func = env[func.literal]
+            if not isinstance(func, LispLambda):
+                raise Exception(f'{str(func)} is not a procedure')
+
+            if len(func.parameters) != len(args):
+                raise Exception(f'{str(func)} require {len(func.parameters)} parameter but got {len(args)}')
+
+            return func.invoke(env, args)

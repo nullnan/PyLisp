@@ -43,9 +43,10 @@ class LispAtom(LispElement):
         return super().__eq__(other) and self.literal == other.literal
 
 
-@dataclass
 class LispNumber(LispAtom):
-    number: int
+    def __init__(self, number):
+        self.number = number
+        self.literal = str(number)
 
     def __str__(self):
         return str(self.number)

@@ -32,7 +32,7 @@ class Parser:
             raise NumberFormatException(literal_num)
         num = int(literal_num)
         self.s_exp = self.s_exp[len(literal_num):]
-        return LispNumber(literal_num, num)
+        return LispNumber(num)
 
     def parse_list(self) -> LispList:
         assert len(self.s_exp) > 0 and self.s_exp[0] == '('

@@ -7,7 +7,7 @@ class TestAstNode(unittest.TestCase):
         self.assertEqual(True, LispAtom('+').is_atom())
 
     def test_number(self):
-        self.assertEqual(True, LispNumber('1234', -1234).is_atom())
+        self.assertEqual(True, LispNumber(-1234).is_atom())
 
     def test_string(self):
         self.assertEqual(True, LispString('Test').is_atom())

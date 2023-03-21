@@ -1,6 +1,7 @@
 import unittest
 
 from ast_node import *
+from errors import *
 from evaluator import Evaluator
 from parser import Parser
 
@@ -23,13 +24,13 @@ class TestEval(unittest.TestCase):
         return Evaluator.eval(root, env)
 
     def test_eval_atom(self):
-        self.assertEqual(LispNumber('12345', 12345), self.eval_lisp('12345'))
+        self.assertEqual(LispNumber(12345), self.eval_lisp('12345'))
 
         self.assertEqual(LispString("Hello"), self.eval_lisp('\"Hello\"'))
 
         self.assertEqual(LispList([]), self.eval_lisp('()'))
 
-        self.assertEqual(LispNumber('5', 5), self.eval_lisp("x", {'x': LispNumber('5', 5)}))
+        self.assertEqual(LispNumber(5), self.eval_lisp("x", {'x': LispNumber(5)}))
 
     def test_eval_quote(self):
         self.assertEqual(LispList([]), self.eval_lisp('(quote ())'))
@@ -114,3 +115,37 @@ class TestEval(unittest.TestCase):
         assertLispOutput(self, '(m)', '(subst \'m \'b \'(b))', env)
 
         assertLispOutput(self, '(a m (a m c) d)', '(subst \'m \'b \'(a b (a b c) d))', env)
+
+
+class TestEvalError(unittest.TestCase):
+    def test_eval_atom_not_found(self):
+        with self.assertRaises(UnboundedNameException):
+            assertLispOutput(self, '', 'x')
+            assertLispOutput(self, '', '(x)')
+
+    def test_eval_error(self):
+        with self.assertRaises(EvalException):
+            assertLispOutput(self, '', '(x)', {'x': LispNumber(123)})
+            assertLispOutput(self, '', '(x)', {'x': LispList()})
+            assertLispOutput(self, '', '(x)', {'x': LispString('abcd')})
+            assertLispOutput(self, '', '(x)', {'x': LispList([LispAtom('a'), LispAtom('b')])})
+
+    def test_builtin_error(self):
+
+        with self.assertRaises(BuiltinFunctionException):
+            assertLispOutput(self, '', '(car \'a)')
+            assertLispOutput(self, '', '(car \'a \'b)')
+            assertLispOutput(self, '', '(car 1234)')
+            assertLispOutput(self, '', '(cdr \'a)')
+            assertLispOutput(self, '', '(cdr \'a \'b)')
+            assertLispOutput(self, '', '(cdr 1234)')
+            assertLispOutput(self, '', '(quote a b)')
+            assertLispOutput(self, '', '(atom \'a \'b)')
+            assertLispOutput(self, '', '(eq \'a \'b \'c)')
+            assertLispOutput(self, '', '(eq \'a)')
+            assertLispOutput(self, '', '(eq \'a \'b \'c)')
+            assertLispOutput(self, '', '(cons \'a)')
+            assertLispOutput(self, '', '(cons \'a \'b \'c)')
+            assertLispOutput(self, '', '(cons \'a \'b)')
+            assertLispOutput(self, '', '(lambda a \'a)')
+            assertLispOutput(self, '', '(defun \'a)')

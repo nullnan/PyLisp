@@ -1,5 +1,6 @@
 from ast_node import LispElement, LispList, LispAtom, LispNumber, LispString
 import evaluator
+from errors import EvalException
 
 
 class LispLambda(LispElement):
@@ -9,7 +10,7 @@ class LispLambda(LispElement):
         self.func_name = func_name
         for parameter in parameters:
             if not isinstance(parameter, LispAtom) or isinstance(parameter, (LispNumber, LispString)):
-                raise Exception('lambda parameter must be a literal atom')
+                raise EvalException('lambda parameter must be a literal atom')
             self.parameters.append(parameter.literal)
 
     def is_atom(self):
@@ -28,7 +29,8 @@ class LispLambda(LispElement):
         return False
 
     def invoke(self, env: dict, args: list[LispElement]) -> LispElement:
-        assert len(self.parameters) == len(args)
+        if len(self.parameters) != len(args):
+            raise EvalException(f'{str(self)} require {len(self.parameters)} parameter but got {len(args)}')
 
         arguments = {}
         for index in range(len(self.parameters)):

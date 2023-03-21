@@ -1,5 +1,6 @@
 import unittest
 
+from errors import *
 from parser import Parser
 from ast_node import *
 
@@ -147,6 +148,20 @@ class TestRoundTrip(unittest.TestCase):
         assert_roundtrip(self, '(quote (a b c))')
 
         assert_roundtrip(self, '(atom (atom (quote a)))')
+
+
+class TestParseError(unittest.TestCase):
+    def test_parse_bracket_not_complete(self):
+        with self.assertRaises(MismatchParenthesesException):
+            Parser('(').parse()
+            Parser(')').parse()
+            Parser('(((()))').parse()
+
+    def test_number_format(self):
+        with self.assertRaises(NumberFormatException):
+            Parser('-1223sad21').parse()
+            Parser('123abc21').parse()
+            Parser('123.1231').parse()
 
 
 if __name__ == '__main__':

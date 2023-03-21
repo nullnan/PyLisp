@@ -1,11 +1,13 @@
 import ast
 import re
 from ast_node import *
+from errors import MismatchParenthesesException, NumberFormatException
 
 
 class Parser:
     string_re = re.compile(r'(?<!\\)\"')
     atom_re = re.compile(r'\s|\)')
+    number_re = re.compile(r'^-?\d+$')
 
     def __init__(self, s_exp: str | None):
         self.s_exp = s_exp
@@ -26,6 +28,8 @@ class Parser:
             if len(self.s_exp) <= 1 or not self.s_exp[1].isdigit():
                 return self.parse_atom()
         literal_num = self.s_exp.split()[0]
+        if re.fullmatch(Parser.number_re, literal_num) is None:
+            raise NumberFormatException(literal_num)
         num = int(literal_num)
         self.s_exp = self.s_exp[len(literal_num):]
         return LispNumber(literal_num, num)
@@ -63,7 +67,11 @@ class Parser:
             if self.s_exp[0].isdigit() or self.s_exp[0] == '-':
                 return self.parse_num()
             elif self.s_exp[0] == '(':
-                return self.parse_list()
+                current_level = self.parentheses_stack
+                root = self.parse_list()
+                if self.parentheses_stack != current_level:
+                    raise MismatchParenthesesException()
+                return root
             elif self.s_exp[0] == '"':
                 return self.parse_string()
             elif self.s_exp[0] == '\'':

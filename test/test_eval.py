@@ -69,14 +69,14 @@ class TestEval(unittest.TestCase):
     def test_eval_car_operator(self):
         assertLispOutput(self, 'a', '(car \'(a b c))')
 
-        assertLispOutput(self, '(a b)', '(car \'((a b) c d)')
+        assertLispOutput(self, '(a b)', '(car \'((a b) c d))')
 
         assertLispOutput(self, '()', '(car \'())')
 
     def test_eval_cdr_operator(self):
         assertLispOutput(self, '(b c)', '(cdr \'(a b c))')
 
-        assertLispOutput(self, '(c d)', '(cdr \'((a b) c d)')
+        assertLispOutput(self, '(c d)', '(cdr \'((a b) c d))')
 
         assertLispOutput(self, '()', '(cdr \'())')
 
@@ -111,6 +111,6 @@ class TestEval(unittest.TestCase):
         """, env)
         assertLispOutput(self, 'm', '(subst \'m \'b \'b)', env)
 
-        assertLispOutput(self, '(m)', '(subst \'m \'b \'(b)', env)
+        assertLispOutput(self, '(m)', '(subst \'m \'b \'(b))', env)
 
         assertLispOutput(self, '(a m (a m c) d)', '(subst \'m \'b \'(a b (a b c) d))', env)

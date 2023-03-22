@@ -113,10 +113,11 @@ def define_fun(operands: list, env: dict):
 def plus(operands: list, env: dict):
     result_sum = 0
     for operand in operands:
-        if not isinstance(operand, LispNumber):
+        number = evaluator.Evaluator.eval(operand, env)
+        if not isinstance(number, LispNumber):
             raise BuiltinFunctionException(f'{operand} is not a number')
-        assert isinstance(operand, LispNumber)
-        result_sum += operand.number
+        assert isinstance(number, LispNumber)
+        result_sum += number.number
     return LispNumber(result_sum)
 
 

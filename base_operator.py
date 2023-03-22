@@ -129,5 +129,6 @@ base_operators = {
     'cons': cons,
     'cond': cond,
     'lambda': mk_fun,
-    'defun': define_fun
+    'defun': define_fun,
+    '+': plus
 }

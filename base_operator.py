@@ -121,6 +121,28 @@ def plus(operands: list, env: dict):
     return LispNumber(result_sum)
 
 
+def minus(operands: list, env: dict):
+    result_sum = 0
+    for operand in operands:
+        number = evaluator.Evaluator.eval(operand, env)
+        if not isinstance(number, LispNumber):
+            raise BuiltinFunctionException(f'{operand} is not a number')
+        assert isinstance(number, LispNumber)
+        result_sum -= number.number
+    return LispNumber(result_sum)
+
+
+def mul(operands: list, env: dict):
+    result_sum = 1
+    for operand in operands:
+        number = evaluator.Evaluator.eval(operand, env)
+        if not isinstance(number, LispNumber):
+            raise BuiltinFunctionException(f'{operand} is not a number')
+        assert isinstance(number, LispNumber)
+        result_sum *= number.number
+    return LispNumber(result_sum)
+
+
 base_operators = {
     'quote': quote,
     'atom': atom,
@@ -131,5 +153,7 @@ base_operators = {
     'cond': cond,
     'lambda': mk_fun,
     'defun': define_fun,
-    '+': plus
+    '+': plus,
+    '-': minus,
+    '*': mul
 }

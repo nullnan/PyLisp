@@ -9,7 +9,7 @@ Reference: [Lisp之根源](http://daiyuwen.freeshell.org/gb/rol/roots_of_lisp.ht
 
 参照了部分 Scheme 实现了数字和字符串，不过还没有添加相关函数。
 
-作用域只有一个全局的域，在函数内
+作用域只有一个全局的域，在函数内会继承全局域然后新建一个，函数中的自由变量根据调用者确定，貌似这叫动态作用域？
 
 ## Usage
 
